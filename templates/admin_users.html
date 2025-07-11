@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des utilisateurs - Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background-image: url('/static/marbre.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Inter', sans-serif;
+        }
+        .admin-panel {
+            max-width: 1000px;
+            margin: 3rem auto;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-panel">
+        <h2 class="text-center mb-4">Gestion des utilisateurs</h2>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <input type="text" id="searchKeyword" class="form-control" placeholder="Rechercher nom ou email...">
+            </div>
+            <div class="col-md-3">
+                <select id="searchRole" class="form-select">
+                    <option value="">Tous les rôles</option>
+                    <option value="admin">Admin</option>
+                    <option value="user">Utilisateur</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="searchConfirmed" class="form-select">
+                    <option value="">Confirmation</option>
+                    <option value="oui">Oui</option>
+                    <option value="non">Non</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="userTableContainer"></div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">← Retour au panneau admin</a>
+        </div>
+    </div>
+
+<script>
+    function loadUsers(page = 1) {
+        const keyword = $('#searchKeyword').val();
+        const role = $('#searchRole').val();
+        const confirmed = $('#searchConfirmed').val();
+
+        $.get('/admin/users/search', { keyword, role, confirmed, page }, function(data) {
+            let html = '<table class="table table-bordered table-hover bg-white">';
+            html += '<thead class="table-dark"><tr><th>ID</th><th>Nom</th><th>Email</th><th>Rôle</th><th>Confirmé</th><th>Thèmes</th><th>Actions</th></tr></thead><tbody>';
+
+            for (const user of data.users) {
+                html += `<tr>
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>${user.confirmed}</td>
+                    <td>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" onchange="toggleAccess(${user.id}, 'securite')" ${user.securite ? 'checked' : ''}> Sécurité<br>
+                            <input class="form-check-input" type="checkbox" onchange="toggleAccess(${user.id}, 'qualite')" ${user.qualite ? 'checked' : ''}> Qualité<br>
+                            <input class="form-check-input" type="checkbox" onchange="toggleAccess(${user.id}, 'environnement')" ${user.environnement ? 'checked' : ''}> Environnement
+                        </div>
+                    </td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Modifier le statut
+                            </button>
+                            <ul class="dropdown-menu">
+                                ${user.role !== 'admin' ? `<li><a class="dropdown-item" href="/admin/promote/${user.id}">Promouvoir admin</a></li>` : ''}
+                                ${user.role !== 'user' ? `<li><a class="dropdown-item" href="/admin/demote/${user.id}">Rétrograder utilisateur</a></li>` : ''}
+                            </ul>
+                        </div>
+                        <a href="/admin/delete_user/${user.id}" class="btn btn-sm btn-danger mt-1" onclick="return confirm('Confirmer la suppression ?')">Supprimer</a>
+                    </td>
+                </tr>`;
+            }
+
+            html += '</tbody></table>';
+
+            html += '<nav><ul class="pagination justify-content-center">';
+            const totalPages = Math.ceil(data.total / data.per_page);
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<li class="page-item ${i === data.page ? 'active' : ''}"><a class="page-link" href="#" onclick="loadUsers(${i}); return false;">${i}</a></li>`;
+            }
+            html += '</ul></nav>';
+
+            $('#userTableContainer').html(html);
+        });
+    }
+
+    function toggleAccess(userId, theme) {
+        $.post('/admin/users/toggle_access', { user_id: userId, theme: theme }, function(response) {
+            if (!response.success) {
+                alert("Erreur lors de la mise à jour de l'accès.");
+            }
+        });
+    }
+
+    $('#searchKeyword, #searchRole, #searchConfirmed').on('input change', () => loadUsers());
+    $(document).ready(() => loadUsers());
+</script>

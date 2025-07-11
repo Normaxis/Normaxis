@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Créer un compte - Normaxis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('/static/marbre.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .logo {
+            height: 160px;
+            width: auto;
+            margin-bottom: 40px;
+            object-fit: contain;
+        }
+
+        .form-control {
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-dark {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .form-link {
+            margin-top: 1rem;
+            display: block;
+        }
+
+        .form-link a {
+            color: #4b4bff;
+            text-decoration: none;
+        }
+
+        .form-link a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            font-size: 0.9rem;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="/static/logo_normaxis.png" alt="Normaxis" class="logo">
+        <h4 class="mb-4">Créer un compte</h4>
+
+        <!-- Zone de messages flash avec support des catégories -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show text-start" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register') }}">
+            <input type="text" name="username" class="form-control" placeholder="Nom d'utilisateur" required value="{{ request.form.username }}">
+            <input type="email" name="email" class="form-control" placeholder="Adresse e-mail" required value="{{ request.form.email }}">
+            <input type="password" name="password" class="form-control" placeholder="Mot de passe" required>
+            <button type="submit" class="btn btn-dark w-100">S'inscrire</button>
+        </form>
+        <div class="form-link">
+            <small>Déjà inscrit ? <a href="{{ url_for('login') }}">Se connecter</a></small>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

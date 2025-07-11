@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier une section - {{ theme|capitalize }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('/static/marbre.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Inter', sans-serif;
+            padding: 2rem;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 700px;
+            margin: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>✏️ Modifier une section de : {{ theme|capitalize }}</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="title" class="form-label">Titre</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ section.title if section else '' }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="content" class="form-label">Contenu</label>
+            <textarea class="form-control" id="content" name="content" rows="4" required>{{ section.content if section else '' }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="video" class="form-label">Vidéo (facultative)</label>
+            <input type="file" class="form-control" id="video" name="video">
+        </div>
+
+        <div class="mb-3">
+            <label for="file" class="form-label">Fichier (facultatif)</label>
+            <input type="file" class="form-control" id="file" name="file">
+        </div>
+
+        <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+        <a href="{{ url_for('edit_sections', theme=theme) }}" class="btn btn-secondary ms-2">Annuler</a>
+    </form>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-dark btn-lg">🔙 Retour au tableau de bord</a>
+    </div>
+</div>
+</body>
+</html>
+
