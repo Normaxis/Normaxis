@@ -6,3 +6,4 @@ werkzeug
 stripe
 gunicorn
 Flask-Mail
+Flask-Migrate
