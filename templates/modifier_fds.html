@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>✏️ Modifier une FDS</h2>
+
+<form method="POST" enctype="multipart/form-data" class="p-4 border rounded bg-light shadow-sm">
+  <div class="mb-3">
+    <label>🧪 Nom du produit</label>
+    <input type="text" name="nom_produit" class="form-control" value="{{ fds.nom_produit }}" required>
+  </div>
+  <div class="mb-3">
+    <label>🏢 Fournisseur</label>
+    <input type="text" name="fournisseur" class="form-control" value="{{ fds.fournisseur }}">
+  </div>
+  <div class="mb-3">
+    <label>📅 Date</label>
+    <input type="date" name="date_fds" class="form-control" value="{{ fds.date_fds.strftime('%Y-%m-%d') }}" required>
+  </div>
+  <div class="mb-3">
+    <label>🔢 Version</label>
+    <input type="text" name="numero_version" class="form-control" value="{{ fds.numero_version }}">
+  </div>
+  <div class="form-check mb-3">
+    <input type="checkbox" name="dangereux" class="form-check-input" id="danger" {% if fds.dangereux %}checked{% endif %}>
+    <label class="form-check-label" for="danger">⚠️ Produit dangereux</label>
+  </div>
+  <div class="mb-3">
+    <label>📁 Nouveau fichier PDF (facultatif)</label>
+    <input type="file" name="fichier_pdf" class="form-control" accept=".pdf">
+  </div>
+  <button class="btn btn-primary">💾 Enregistrer</button>
+</form>
+
+{% endblock %}

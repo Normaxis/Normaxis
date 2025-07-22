@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Archive DUERP</title>
+  <style>
+    body { font-family: Arial; margin: 2em; }
+    h2 { color: #333; }
+  </style>
+</head>
+<body>
+  <h2>DUERP – {{ user.entreprise }}</h2>
+  <p>Date d’archivage : {{ now().strftime('%d/%m/%Y %H:%M') }}</p>
+
+  {% for poste in postes %}
+    <hr>
+    <h3>Poste : {{ poste.nom }}</h3>
+    <p>{{ poste.description }}</p>
+
+    <ul>
+      {% for tache in poste.taches %}
+        <li><strong>Tâche :</strong> {{ tache.nom }}</li>
+        <ul>
+          {% for risque in tache.risques %}
+            <li>
+              Risque : {{ risque.description }} |
+              Gravité : {{ risque.gravite }} |
+              Fréquence : {{ risque.frequence }} |
+              Maîtrise : {{ risque.maitrise }} |
+              Score : {{ risque.score }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+</body>
+</html>

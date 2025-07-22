@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mes Fiches de Sécurité</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url('{{ url_for('static', filename='marbre.jpg') }}') no-repeat center center fixed;
+            background-size: cover;
+            padding: 2rem;
+        }
+
+        .container {
+            background-color: white;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .btn-retour {
+            display: inline-block;
+            margin-bottom: 20px;
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .btn-retour:hover {
+            background-color: #495057;
+        }
+
+        h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="{{ url_for('dashboard') }}" class="btn-retour">⬅ Retour au Dashboard</a>
+
+    <h2>📑 Mes Fiches de Sécurité au Poste</h2>
+
+    <a href="{{ url_for('creer_fiche_securite') }}" class="btn btn-primary mb-3">➕ Nouvelle Fiche</a>
+
+    {% if fiches %}
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Titre</th>
+                <th>Date de mise à jour</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for fiche in fiches %}
+            <tr>
+                <td>{{ fiche.titre }}</td>
+                <td>{{ fiche.date_mise_a_jour.strftime('%d/%m/%Y') }}</td>
+                <td>
+                    <a href="{{ url_for('voir_fiche_securite', fiche_id=fiche.id) }}" class="btn btn-sm btn-outline-secondary">👁️ Voir</a>
+                    <a href="{{ url_for('modifier_fiche_securite', fiche_id=fiche.id) }}" class="btn btn-sm btn-outline-primary">✏️ Modifier</a>
+                    <a href="{{ url_for('supprimer_fiche_securite', fiche_id=fiche.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Confirmer la suppression ?')">🗑️ Supprimer</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="text-muted">Aucune fiche enregistrée.</p>
+    {% endif %}
+</div>
+</body>
+</html>

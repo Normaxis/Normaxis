@@ -8,10 +8,42 @@
 </head>
 <body>
     <div class="container py-5">
-        <h1 class="text-center mb-4">Contenu sécurisé</h1>
+        <h1 class="text-center mb-4">📁 Contenu sécurisé</h1>
         <p class="text-center">Voici les ressources disponibles pour votre compte.</p>
-        <div class="text-center mt-4">
-            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Retour au tableau de bord</a>
+
+        {% if theme_content %}
+            {% for theme, sections in theme_content.items() %}
+                <div class="mt-5">
+                    <h4 class="text-capitalize">{{ theme }}</h4>
+                    <ul class="list-group">
+                        {% for section in sections %}
+                            <li class="list-group-item">
+                                <h5>{{ section.title }}</h5>
+                                <p>{{ section.content }}</p>
+
+                                {% if section.video_url %}
+                                    <video controls class="w-100 mt-2">
+                                        <source src="{{ section.video_url }}" type="video/mp4">
+                                        Votre navigateur ne supporte pas la lecture vidéo.
+                                    </video>
+                                {% endif %}
+
+                                {% if section.file_path %}
+                                    <a href="{{ section.file_path }}" class="btn btn-sm btn-outline-primary mt-2" download>
+                                        📄 Télécharger le fichier
+                                    </a>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center text-muted mt-4">Aucun contenu disponible pour le moment.</p>
+        {% endif %}
+
+        <div class="text-center mt-5">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">← Retour au tableau de bord</a>
         </div>
     </div>
 </body>

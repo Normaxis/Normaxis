@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+body {
+    background-image: url("{{ url_for('static', filename='marbre.jpg') }}");
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#canvas {
+    width: 100%;
+    height: 80vh;
+    position: relative;
+    border: 2px dashed #999;
+    background-color: rgba(255,255,255,0.92);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.fait {
+    position: absolute;
+    padding: 12px 18px;
+    border: 2px solid #333;
+    border-radius: 8px;
+    background-color: #fff9c4;
+    cursor: move;
+    min-width: 120px;
+    text-align: center;
+    user-select: none;
+    font-weight: 500;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+    transition: transform 0.1s;
+}
+
+.fait:hover {
+    transform: scale(1.03);
+}
+
+.fait .btn-del {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+.controls {
+    margin-bottom: 20px;
+}
+</style>
+
+<div class="container mt-4">
+    <h2 class="text-dark mb-4">🧠 Arbre des Causes</h2>
+    <div class="controls d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('liste_accidents') }}" class="btn btn-outline-secondary">📋 Retour à la liste</a>
+        <button class="btn btn-success" onclick="ajouterFait()" type="button">➕ Ajouter une case</button>
+        <button class="btn btn-info" onclick="toggleLiaison()" type="button">🔗 Relier des cases</button>
+        <button class="btn btn-primary" onclick="sauvegarderArbre()" type="button">💾 Sauvegarder</button>
+    </div>
+
+    <form method="post">
+        <div id="canvas">
+            <svg id="svg-canvas" width="100%" height="100%"></svg>
+        </div>
+        <input type="hidden" name="arbre_json" id="arbre_json">
+    </form>
+</div>
+
+<script>
+let compteur = 1;
+let modeLiaison = false;
+let selectedStart = null;
+const canvas = document.getElementById("canvas");
+const svg = document.getElementById("svg-canvas");
+let liens = [];
+
+function ajouterFait() {
+    const div = document.createElement("div");
+    div.className = "fait";
+    div.style.left = `${60 + compteur * 20}px`;
+    div.style.top = `${60 + compteur * 20}px`;
+    div.contentEditable = true;
+
+    const couleur = prompt("Choisissez une couleur : jaune, vert, rouge, bleu", "jaune");
+    switch (couleur.toLowerCase()) {
+        case 'jaune': div.style.backgroundColor = '#fff9c4'; break;
+        case 'vert': div.style.backgroundColor = '#c8e6c9'; break;
+        case 'rouge': div.style.backgroundColor = '#ffcdd2'; break;
+        case 'bleu': div.style.backgroundColor = '#bbdefb'; break;
+        default: div.style.backgroundColor = '#e0e0e0'; break;
+    }
+
+    div.innerText = `Fait ${compteur}`;
+
+    div.addEventListener("click", (e) => {
+        if (modeLiaison) {
+            if (!selectedStart) {
+                selectedStart = div;
+                div.style.border = "3px dashed red";
+            } else if (selectedStart !== div) {
+                creerLiaison(selectedStart, div);
+                selectedStart.style.border = "2px solid #333";
+                selectedStart = null;
+            }
+            e.stopPropagation();
+        }
+    });
+
+    const btnDel = document.createElement("button");
+    btnDel.textContent = "×";
+    btnDel.className = "btn-del";
+    btnDel.onclick = (e) => {
+        e.stopPropagation();
+        div.remove();
+        liens = liens.filter(l => l.start !== div && l.end !== div);
+        redessinerLiens();
+    };
+    div.appendChild(btnDel);
+
+    canvas.appendChild(div);
+    rendreDeplacable(div);
+    compteur++;
+}
+
+function rendreDeplacable(el) {
+    let offsetX, offsetY;
+    el.onmousedown = function (e) {
+        if (e.target.className === "btn-del") return;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        document.onmousemove = function (e) {
+            el.style.left = (e.pageX - offsetX) + "px";
+            el.style.top = (e.pageY - offsetY) + "px";
+            redessinerLiens();
+        };
+        document.onmouseup = function () {
+            document.onmousemove = null;
+        };
+    };
+}
+
+function creerLiaison(start, end) {
+    liens.push({ start, end });
+    redessinerLiens();
+}
+
+function redessinerLiens() {
+    svg.innerHTML = "";
+    liens.forEach(({ start, end }) => {
+        const sRect = start.getBoundingClientRect();
+        const eRect = end.getBoundingClientRect();
+        const cRect = canvas.getBoundingClientRect();
+        const startX = sRect.left + sRect.width / 2 - cRect.left;
+        const startY = sRect.top + sRect.height / 2 - cRect.top;
+        const endX = eRect.left + eRect.width / 2 - cRect.left;
+        const endY = eRect.top + eRect.height / 2 - cRect.top;
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", `M${startX},${startY} C${startX+50},${startY} ${endX-50},${endY} ${endX},${endY}`);
+        path.setAttribute("stroke", "#444");
+        path.setAttribute("stroke-width", "2");
+        path.setAttribute("fill", "none");
+        svg.appendChild(path);
+    });
+}
+
+function toggleLiaison() {
+    modeLiaison = !modeLiaison;
+    canvas.style.cursor = modeLiaison ? "crosshair" : "default";
+    if (!modeLiaison && selectedStart) {
+        selectedStart.style.border = "2px solid #333";
+        selectedStart = null;
+    }
+}
+
+function sauvegarderArbre() {
+    const faits = Array.from(document.querySelectorAll(".fait"));
+    const nodes = faits.map(f => ({
+        id: f.innerText.replace("×", "").trim(),
+        text: f.childNodes[0].nodeValue.trim(),
+        x: f.style.left,
+        y: f.style.top,
+        color: f.style.backgroundColor
+    }));
+    const edges = liens.map(({ start, end }) => ({
+        from: start.innerText.replace("×", "").trim(),
+        to: end.innerText.replace("×", "").trim()
+    }));
+    const data = { nodes, edges };
+    document.getElementById("arbre_json").value = JSON.stringify(data);
+    document.querySelector("form").submit();
+}
+
+window.onload = function () {console.log("Contenu arbre_json :", {{ accident.arbre_json | tojson | safe }});
+
+    const data = JSON.parse({{ accident.arbre_json | tojson | safe }});
+    if (!data || !data.nodes) return;
+
+    data.nodes.forEach(node => {
+        const div = document.createElement("div");
+        div.className = "fait";
+        div.style.left = node.x;
+        div.style.top = node.y;
+        div.style.backgroundColor = node.color;
+        div.contentEditable = true;
+        div.innerText = node.text;
+
+        div.addEventListener("click", (e) => {
+            if (modeLiaison) {
+                if (!selectedStart) {
+                    selectedStart = div;
+                    div.style.border = "3px dashed red";
+                } else if (selectedStart !== div) {
+                    creerLiaison(selectedStart, div);
+                    selectedStart.style.border = "2px solid #333";
+                    selectedStart = null;
+                }
+                e.stopPropagation();
+            }
+        });
+
+        const btnDel = document.createElement("button");
+        btnDel.textContent = "×";
+        btnDel.className = "btn-del";
+        btnDel.onclick = (e) => {
+            e.stopPropagation();
+            div.remove();
+            liens = liens.filter(l => l.start !== div && l.end !== div);
+            redessinerLiens();
+        };
+        div.appendChild(btnDel);
+
+        canvas.appendChild(div);
+        rendreDeplacable(div);
+    });
+
+    const faits = Array.from(document.querySelectorAll(".fait"));
+    const getFaitByText = text => faits.find(f => f.innerText.replace("×", "").trim() === text);
+
+    data.edges.forEach(edge => {
+        const from = getFaitByText(edge.from);
+        const to = getFaitByText(edge.to);
+        if (from && to) creerLiaison(from, to);
+    });
+};
+</script>
+{% endblock %}

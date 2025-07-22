@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>📂 Fiches de Données de Sécurité</h2>
+
+<!-- Bouton pour ajouter une nouvelle FDS -->
+{% if current_user.role == 'admin' or current_user.role == 'gestionnaire' %}
+<a href="{{ url_for('ajouter_fds') }}" class="btn btn-success mb-4">
+  ➕ Ajouter une FDS
+</a>
+{% endif %}
+
+<!-- Formulaire de filtrage -->
+<form method="get" class="row g-3 mb-4">
+  <div class="col-md-3">
+    <input type="text" name="nom" class="form-control" placeholder="🔍 Nom du produit" value="{{ request.args.get('nom', '') }}">
+  </div>
+  <div class="col-md-3">
+    <input type="text" name="fournisseur" class="form-control" placeholder="🏢 Fournisseur" value="{{ request.args.get('fournisseur', '') }}">
+  </div>
+  <div class="col-md-3 form-check mt-2">
+    <input type="checkbox" class="form-check-input" name="dangereux" id="danger" {% if request.args.get('dangereux') %}checked{% endif %}>
+    <label class="form-check-label" for="danger">⚠️ Produits dangereux</label>
+  </div>
+  <div class="col-md-3">
+    <button class="btn btn-primary">🔍 Filtrer</button>
+  </div>
+</form>
+
+<!-- Tableau des FDS -->
+<table class="table table-bordered table-hover">
+  <thead class="table-light">
+    <tr>
+      <th>Nom du produit</th>
+      <th>Fournisseur</th>
+      <th>Date</th>
+      <th>Version</th>
+      <th>Danger</th>
+      <th>Fichier</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for fds in fds_list %}
+    <tr>
+      <td>{{ fds.nom_produit }}</td>
+      <td>{{ fds.fournisseur or "—" }}</td>
+      <td>{{ fds.date_fds.strftime('%d/%m/%Y') }}</td>
+      <td>{{ fds.numero_version or "—" }}</td>
+      <td>{% if fds.dangereux %}⚠️ Oui{% else %}—{% endif %}</td>
+      <td>
+        <a href="{{ url_for('static', filename=fds.fichier_pdf.replace('static/', '')) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+          📥 Télécharger
+        </a>
+      </td>
+      <td>
+        {% if fds.user_id == current_user.id or current_user.role == 'admin' %}
+        <a href="{{ url_for('modifier_fds', fds_id=fds.id) }}" class="btn btn-sm btn-outline-secondary mb-1">
+          ✏️ Modifier
+        </a>
+        <form method="POST" action="{{ url_for('supprimer_fds', fds_id=fds.id) }}" onsubmit="return confirm('❌ Supprimer cette FDS ?');" style="display:inline;">
+          <button class="btn btn-sm btn-danger">🗑️ Supprimer</button>
+        </form>
+        {% else %}
+        <span class="text-muted">—</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="7" class="text-center">Aucune fiche trouvée.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

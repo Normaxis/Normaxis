@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Profil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Inter', sans-serif;
+            padding: 2rem;
+        }
+
+        .profile-container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            position: relative;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #dee2e6;
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            text-align: left;
+            display: block;
+        }
+
+        .form-control[readonly] {
+            background-color: #e9ecef;
+        }
+
+        .btn-retour {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="profile-container">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm btn-retour">← Retour</a>
+
+    <h2>👤 Mon Profil</h2>
+
+    <form method="POST" action="{{ url_for('profil', id=user.id) }}" enctype="multipart/form-data">
+        <label for="logo" title="Cliquez pour changer le logo">
+            <img src="{{ url_for('static', filename='uploads/' + user.logo) if user.logo else url_for('static', filename='default_logo.png') }}" alt="Logo de l'entreprise" class="profile-image" id="logoPreview">
+        </label>
+        <input type="file" name="logo" id="logo" accept="image/*" class="form-control" style="display: none;" onchange="previewLogo(event)">
+
+        <div class="form-group mb-3 text-start">
+            <label for="email">Adresse e-mail</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" readonly>
+        </div>
+        <div class="form-group mb-3 text-start">
+            <label for="nom">Nom</label>
+            <input type="text" class="form-control" id="nom" name="nom" value="{{ user.nom or '' }}">
+        </div>
+        <div class="form-group mb-3 text-start">
+            <label for="prenom">Prénom</label>
+            <input type="text" class="form-control" id="prenom" name="prenom" value="{{ user.prenom or '' }}">
+        </div>
+        <div class="form-group mb-3 text-start">
+            <label for="fonction">Fonction</label>
+            <input type="text" class="form-control" id="fonction" name="fonction" value="{{ user.fonction or '' }}">
+        </div>
+        <div class="form-group mb-3 text-start">
+            <label for="telephone">Téléphone</label>
+            <input type="text" class="form-control" id="telephone" name="telephone" value="{{ user.telephone or '' }}">
+        </div>
+        <div class="form-group mb-3 text-start">
+            <label for="entreprise">Nom de l'entreprise</label>
+            <input type="text" class="form-control" id="entreprise" name="entreprise" value="{{ user.entreprise or '' }}">
+        </div>
+        <div class="form-group mb-4 text-start">
+            <label for="adresse">Adresse</label>
+            <input type="text" class="form-control" id="adresse" name="adresse" value="{{ user.adresse or '' }}">
+        </div>
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function previewLogo(event) {
+        const output = document.getElementById('logoPreview');
+        output.src = URL.createObjectURL(event.target.files[0]);
+        output.onload = function () {
+            URL.revokeObjectURL(output.src);
+        }
+    }
+</script>
+
+</body>
+</html>

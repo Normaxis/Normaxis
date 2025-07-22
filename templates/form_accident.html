@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+body {
+    background-image: url("{{ url_for('static', filename='marbre.jpg') }}");
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+}
+
+.card-at {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    max-width: 1000px;
+    margin: auto;
+}
+
+#drawflow {
+    width: 100%;
+    height: 500px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+}
+
+.drawflow-node {
+    background-color: #f2f2f2;
+    border: 2px solid #555;
+    border-radius: 10px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    font-size: 14px;
+    font-family: "Segoe UI", sans-serif;
+    min-width: 220px;
+    max-width: 350px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.drawflow-node input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-weight: 500;
+    color: #222;
+    font-size: 14px;
+    padding: 4px;
+    text-align: center;
+    word-wrap: break-word;
+}
+
+.drawflow-node[data-node="fait"] {
+    background-color: #e8f0fe;
+    border-color: #3366cc;
+}
+
+.drawflow-node[data-node="fait_ultime"] {
+    background-color: #fdecea;
+    border-color: #cc0000;
+}
+
+.drawflow-node strong {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+    font-size: 15px;
+}
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drawflow@0.0.50/dist/drawflow.min.css">
+<script src="{{ url_for('static', filename='js/drawflow.min.js') }}"></script>
+
+<div class="container mt-5">
+    <div class="card-at">
+        <h2 class="mb-4">{% if accident %}Modifier{% else %}Ajouter{% endif %} un Accident de Travail</h2>
+
+        <form method="post" onsubmit="saveDrawflowJson()">
+            <!-- Données classiques -->
+            <div class="mb-3">
+                <label class="form-label">📅 Date de l'accident :</label>
+                <input type="date" name="date_accident" class="form-control" required
+                       value="{{ accident.date_accident if accident else '' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">🏷️ Poste concerné :</label>
+                <select name="poste_id" class="form-select" required>
+                    {% for p in postes %}
+                        <option value="{{ p.id }}" {% if accident and accident.poste_id == p.id %}selected{% endif %}>
+                            {{ p.nom }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">🧩 Tâche (facultatif) :</label>
+                <select name="tache_id" class="form-select">
+                    <option value="">—</option>
+                    {% for t in taches %}
+                        <option value="{{ t.id }}" {% if accident and accident.tache_id == t.id %}selected{% endif %}>
+                            {{ t.nom }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">📍 Lieu :</label>
+                <input type="text" name="lieu" class="form-control" required
+                       value="{{ accident.lieu if accident else '' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">📝 Description :</label>
+                <textarea name="description" class="form-control" rows="2" required>{{ accident.description if accident else '' }}</textarea>
+
+            <div class="mb-3">
+                <label class="form-label">🔍 Circonstance :</label>
+                <textarea name="description" class="form-control" rows="2" required>{{ accident.description if accident else '' }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">⚠️ Conséquences :</label>
+                <textarea name="consequences" class="form-control" rows="2">{{ accident.consequences if accident else '' }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">✅ Actions correctives :</label>
+                <textarea name="actions_correctives" class="form-control" rows="2">{{ accident.actions_correctives if accident else '' }}</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success">💾 Enregistrer</button>
+            <a href="{{ url_for('liste_accidents') }}" class="btn btn-secondary">↩️ Retour</a>
+        </form>
+    </div>
+</div>
+
+<script>
+    const container = document.getElementById('drawflow');
+    const editor = new Drawflow(container);
+    editor.reroute = true;
+    editor.editor_mode = "edit";
+    editor.start();
+
+    let nodeCounter = 1;
+
+    // Fait ultime par défaut
+    window.addEventListener('DOMContentLoaded', () => {
+        const htmlContent = `
+            <div style="text-align:center;">
+                <strong style="color:red;">⚠️ Fait ultime</strong><br/>
+                <input type="text" df-name placeholder="Décrire l'accident..." />
+            </div>
+        `;
+        editor.addNode('fait_ultime', 1, 1, 400, 100, 'fait_ultime', { name: '' }, htmlContent);
+
+        {% if accident and accident.arbre_json %}
+        editor.import(JSON.parse(`{{ accident.arbre_json | tojson | safe }}`));
+        {% endif %}
+    });
+
+    function addNode() {
+        const htmlContent = `
+            <div>
+                <label>Fait ${nodeCounter}</label>
+                <input type="text" df-name placeholder="Décrire un fait ou cause..." />
+            </div>
+        `;
+        editor.addNode('fait', 1, 1, 150 + nodeCounter * 30, 300 + nodeCounter * 20, 'fait', { name: '' }, htmlContent);
+        nodeCounter++;
+    }
+
+    function saveDrawflowJson() {
+        const data = editor.export();
+        document.getElementById('arbre_json').value = JSON.stringify(data);
+    }
+
+    container.addEventListener('input', function (e) {
+        if (e.target.matches('input[df-name]')) {
+            const nodeId = e.target.closest(".drawflow-node").id.replace("node-", "");
+            editor.drawflow.drawflow["Home"].data[nodeId].data.name = e.target.value;
+        }
+    });
+</script>
+{% endblock %}

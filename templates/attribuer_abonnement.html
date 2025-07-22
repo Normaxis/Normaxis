@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Attribuer un abonnement à {{ user.nom }}</h3>
+<form method="POST">
+    <label for="theme">Thème :</label>
+    <select name="theme" class="form-control">
+        <option value="Thème A">Thème A</option>
+        <option value="Thème B">Thème B</option>
+        <option value="Thème C">Thème C</option>
+    </select>
+    <button type="submit" class="btn btn-success mt-2">Attribuer</button>
+</form>
+{% endblock %}

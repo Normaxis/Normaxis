@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         body {
             background-image: url('/static/marbre.jpg');
@@ -15,10 +16,10 @@
             font-family: 'Inter', sans-serif;
         }
         .admin-panel {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 3rem auto;
             background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
             padding: 2rem;
             border-radius: 1rem;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -26,99 +27,264 @@
         .table th, .table td {
             vertical-align: middle;
         }
+        .table td {
+            word-break: break-word;
+        }
     </style>
 </head>
 <body>
-    <div class="admin-panel">
-        <h2 class="text-center mb-4">Gestion des utilisateurs</h2>
+<div class="admin-panel">
+    <h2 class="text-center mb-4">Gestion des utilisateurs</h2>
 
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <input type="text" id="searchKeyword" class="form-control" placeholder="Rechercher nom ou email...">
+    <!-- Formulaire création -->
+    <div class="card mb-4 p-3 bg-light">
+        <h5>Créer un nouvel utilisateur</h5>
+        <form id="createUserForm" class="row g-2 align-items-end">
+            <div class="col-md">
+                <input type="text" class="form-control" name="username" placeholder="Nom d'utilisateur" required>
             </div>
-            <div class="col-md-3">
-                <select id="searchRole" class="form-select">
-                    <option value="">Tous les rôles</option>
-                    <option value="admin">Admin</option>
+            <div class="col-md">
+                <input type="email" class="form-control" name="email" placeholder="Email" required>
+            </div>
+            <div class="col-md">
+                <input type="password" class="form-control" name="password" placeholder="Mot de passe" required>
+            </div>
+            <div class="col-md">
+                <select name="role" class="form-select">
                     <option value="user">Utilisateur</option>
+                    <option value="admin">Admin</option>
                 </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Créer</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Formulaire import Excel -->
+    <div class="card mb-4 p-3 bg-light">
+        <h5>Importer des utilisateurs via Excel</h5>
+        <form id="excelUploadForm" enctype="multipart/form-data" class="row g-2 align-items-end">
+            <div class="col-md-9">
+                <input type="file" class="form-control" name="excel" accept=".xlsx" required>
             </div>
             <div class="col-md-3">
-                <select id="searchConfirmed" class="form-select">
-                    <option value="">Confirmation</option>
-                    <option value="oui">Oui</option>
-                    <option value="non">Non</option>
-                </select>
+                <button type="submit" class="btn btn-success w-100">Importer</button>
             </div>
+        </form>
+    </div>
+
+    <!-- Filtres -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="searchKeyword" class="form-control" placeholder="Rechercher nom ou email...">
         </div>
-
-        <div id="userTableContainer"></div>
-
-        <div class="text-center mt-4">
-            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">← Retour au panneau admin</a>
+        <div class="col-md-3">
+            <select id="searchRole" class="form-select">
+                <option value="">Tous les rôles</option>
+                <option value="admin">Admin</option>
+                <option value="user">Utilisateur</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select id="searchConfirmed" class="form-select">
+                <option value="">Confirmation</option>
+                <option value="oui">Oui</option>
+                <option value="non">Non</option>
+            </select>
         </div>
     </div>
 
+    <!-- Tableau -->
+    <div id="userTableContainer"></div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">← Retour au panneau admin</a>
+    </div>
+</div>
+
+<!-- Modal abonnement -->
+<div class="modal fade" id="abonnementModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="abonnementForm">
+        <div class="modal-header">
+          <h5 class="modal-title">Gérer l'abonnement</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="user_id" id="abonnementUserId">
+          <div class="mb-3">
+            <label class="form-label">Thème</label>
+            <select class="form-select" name="theme">
+              <option value="securite">Sécurité</option>
+              <option value="qualite">Qualité</option>
+              <option value="environnement">Environnement</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date de début</label>
+            <input type="date" class="form-control" name="date_debut" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date de fin</label>
+            <input type="date" class="form-control" name="date_fin" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Enregistrer</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 🔁 Fonction améliorée pour afficher les abonnements -->
 <script>
-    function loadUsers(page = 1) {
-        const keyword = $('#searchKeyword').val();
-        const role = $('#searchRole').val();
-        const confirmed = $('#searchConfirmed').val();
+function formatAbonnementBadges(abonnements) {
+    if (!abonnements?.length) return '<span class="text-muted">Aucun</span>';
+    
+    const today = new Date();
+    return abonnements.map(ab => {
+        const debut = new Date(ab.date_debut);
+        const fin = new Date(ab.date_fin);
+        const isExpired = fin < today;
+        const badgeClass = isExpired ? 'bg-danger' : 'bg-success';
+        const themeLabel = ab.theme.charAt(0).toUpperCase() + ab.theme.slice(1);
+        const debutStr = debut.toLocaleDateString('fr-FR');
+        const finStr = fin.toLocaleDateString('fr-FR');
 
-        $.get('/admin/users/search', { keyword, role, confirmed, page }, function(data) {
-            let html = '<table class="table table-bordered table-hover bg-white">';
-            html += '<thead class="table-dark"><tr><th>ID</th><th>Nom</th><th>Email</th><th>Rôle</th><th>Confirmé</th><th>Thèmes</th><th>Actions</th></tr></thead><tbody>';
-
-            for (const user of data.users) {
-                html += `<tr>
-                    <td>${user.id}</td>
-                    <td>${user.username}</td>
-                    <td>${user.email}</td>
-                    <td>${user.role}</td>
-                    <td>${user.confirmed}</td>
-                    <td>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" onchange="toggleAccess(${user.id}, 'securite')" ${user.securite ? 'checked' : ''}> Sécurité<br>
-                            <input class="form-check-input" type="checkbox" onchange="toggleAccess(${user.id}, 'qualite')" ${user.qualite ? 'checked' : ''}> Qualité<br>
-                            <input class="form-check-input" type="checkbox" onchange="toggleAccess(${user.id}, 'environnement')" ${user.environnement ? 'checked' : ''}> Environnement
-                        </div>
-                    </td>
-                    <td>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                Modifier le statut
-                            </button>
-                            <ul class="dropdown-menu">
-                                ${user.role !== 'admin' ? `<li><a class="dropdown-item" href="/admin/promote/${user.id}">Promouvoir admin</a></li>` : ''}
-                                ${user.role !== 'user' ? `<li><a class="dropdown-item" href="/admin/demote/${user.id}">Rétrograder utilisateur</a></li>` : ''}
-                            </ul>
-                        </div>
-                        <a href="/admin/delete_user/${user.id}" class="btn btn-sm btn-danger mt-1" onclick="return confirm('Confirmer la suppression ?')">Supprimer</a>
-                    </td>
-                </tr>`;
-            }
-
-            html += '</tbody></table>';
-
-            html += '<nav><ul class="pagination justify-content-center">';
-            const totalPages = Math.ceil(data.total / data.per_page);
-            for (let i = 1; i <= totalPages; i++) {
-                html += `<li class="page-item ${i === data.page ? 'active' : ''}"><a class="page-link" href="#" onclick="loadUsers(${i}); return false;">${i}</a></li>`;
-            }
-            html += '</ul></nav>';
-
-            $('#userTableContainer').html(html);
-        });
-    }
-
-    function toggleAccess(userId, theme) {
-        $.post('/admin/users/toggle_access', { user_id: userId, theme: theme }, function(response) {
-            if (!response.success) {
-                alert("Erreur lors de la mise à jour de l'accès.");
-            }
-        });
-    }
-
-    $('#searchKeyword, #searchRole, #searchConfirmed').on('input change', () => loadUsers());
-    $(document).ready(() => loadUsers());
+        return `
+            <span class="badge ${badgeClass} me-1 mb-1 d-inline-flex align-items-center">
+                ${themeLabel} (${debutStr} → ${finStr})
+                <button type="button" class="btn-close btn-close-white btn-sm ms-2"
+                        aria-label="Supprimer" onclick="deleteAbonnement(${ab.id})"></button>
+            </span>
+        `;
+    }).join('<br>');
+}
 </script>
+
+<!-- 🗑 Fonction pour supprimer un abonnement -->
+<script>
+function deleteAbonnement(abonnementId) {
+    if (!confirm("Supprimer cet abonnement ?")) return;
+
+    $.ajax({
+        url: `/admin/abonnement/delete/${abonnementId}`,
+        type: 'DELETE',
+        success: response => {
+            if (response.success) {
+                alert("Abonnement supprimé !");
+                loadUsers();
+            } else {
+                alert("Erreur : " + (response.error || 'Erreur inconnue'));
+            }
+        },
+        error: () => alert("Erreur lors de la suppression.")
+    });
+}
+</script>
+
+<!-- Script principal : chargement, filtres, création, import -->
+<script>
+function loadUsers(page = 1) {
+    const keyword = $('#searchKeyword').val();
+    const role = $('#searchRole').val();
+    const confirmed = $('#searchConfirmed').val();
+
+    $.get('/admin/users/search', { keyword, role, confirmed, page }, data => {
+        let html = `<table class="table table-bordered table-hover bg-white">
+            <thead class="table-dark"><tr>
+              <th>ID</th><th>Nom</th><th>Email</th><th>Rôle</th><th>Confirmé</th><th>Thèmes</th><th>Actions</th>
+            </tr></thead><tbody>`;
+        for (const user of data.users) {
+            html += `<tr>
+                <td>${user.id}</td>
+                <td>${user.username}</td>
+                <td class="text-break">${user.email}</td>
+                <td>${user.role}</td>
+                <td>${user.confirmed}</td>
+                <td>
+                    ${formatAbonnementBadges(user.abonnements)}
+                    <br>
+                    <button class="btn btn-sm btn-outline-primary mt-1"
+                            onclick="$('#abonnementUserId').val(${user.id}); $('#abonnementModal').modal('show');">
+                      Gérer
+                    </button>
+                </td>
+                <td>
+                    <div class="dropdown mb-1">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">Statut</button>
+                        <ul class="dropdown-menu">
+                          ${user.role!=='admin'?`<li><a class="dropdown-item" href="/admin/promote/${user.id}">Promouvoir admin</a></li>`:``}
+                          ${user.role!=='user'?`<li><a class="dropdown-item" href="/admin/demote/${user.id}">Rétrograder utilisateur</a></li>`:``}
+                        </ul>
+                    </div>
+                    <a href="/admin/delete_user/${user.id}" class="btn btn-sm btn-danger"
+                       onclick="return confirm('Confirmer la suppression ?')">Supprimer</a>
+                </td>
+            </tr>`;
+        }
+        html += `</tbody></table><nav><ul class="pagination justify-content-center">`;
+        const totalPages = Math.ceil(data.total / data.per_page);
+        for (let i=1; i<=totalPages; i++) {
+            html += `<li class="page-item ${i===data.page?'active':''}">
+                        <a class="page-link" href="#" onclick="loadUsers(${i});return false;">${i}</a>
+                     </li>`;
+        }
+        html += `</ul></nav>`;
+        $('#userTableContainer').html(html);
+    });
+}
+
+$('#searchKeyword,#searchRole,#searchConfirmed').on('input change', () => loadUsers());
+
+$('#createUserForm').on('submit', e => {
+    e.preventDefault();
+    $.post('/admin/users/create', $('#createUserForm').serialize(), res => {
+        alert(res.success? "Utilisateur créé !" : "Erreur : " + res.error);
+        if(res.success){ $('#createUserForm')[0].reset(); loadUsers(); }
+    });
+});
+
+$('#excelUploadForm').on('submit', e => {
+    e.preventDefault();
+    const formData = new FormData($('#excelUploadForm')[0]);
+    $.ajax({
+        url: '/admin/users/create',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: res => {
+            alert(res.success? (res.message || "Import réussi !") : "Erreur : " + res.error);
+            if(res.success){ $('#excelUploadForm')[0].reset(); loadUsers(); }
+        },
+        error: () => alert("Erreur lors de l'import.")
+    });
+});
+
+$(document).ready(() => loadUsers());
+</script>
+<script>
+$('#abonnementForm').on('submit', function(e) {
+    e.preventDefault();
+    const formData = $(this).serialize();
+    $.post('/admin/abonnement/create', formData, res => {
+        if (res.success) {
+            alert("Abonnement enregistré !");
+            $('#abonnementModal').modal('hide');
+            loadUsers();
+        } else {
+            alert("Erreur : " + (res.error || "Inconnue"));
+        }
+    }).fail(() => {
+        alert("Erreur réseau lors de l'enregistrement.");
+    });
+});
+</script>
+
+</body>
+</html>

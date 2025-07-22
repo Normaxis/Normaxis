@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>📄 Document Unique d'Évaluation des Risques</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f9f9f9;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .btn-print {
+            float: right;
+            margin-top: -3rem;
+        }
+
+        .poste-section {
+            margin-bottom: 2.5rem;
+            padding: 1rem 1.5rem;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 0.5rem;
+        }
+
+        .poste-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .tache-section {
+            margin-top: 1rem;
+        }
+
+        .tache-title {
+            font-weight: 500;
+            margin: 1rem 0 0.5rem 0;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        table th, table td {
+            padding: 0.6rem;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+
+        .risque-vert {
+            background-color: #e6f4ea;
+        }
+
+        .risque-jaune {
+            background-color: #fff9db;
+        }
+
+        .risque-rouge {
+            background-color: #fdecea;
+        }
+
+        .score-cell {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📄 Document Unique<br><small class="text-muted">Évaluation des Risques Professionnels</small></h1>
+    <a href="#" class="btn btn-primary btn-sm btn-print" onclick="window.print()">🖨️ Imprimer le DUERP</a>
+    <form method="POST" action="{{ url_for('archiver_duerp') }}">
+  <input type="text" name="commentaire" placeholder="Commentaire (optionnel)" class="form-control mb-2">
+  <button class="btn btn-success">📦 Archiver ce DUERP</button>
+</form>
+    {% for poste in postes %}
+    <div class="poste-section">
+        <div class="poste-title">📌 Poste : {{ poste.nom }}</div>
+        <div class="text-muted mb-2">{{ poste.description }}</div>
+
+        {% for tache in poste.taches %}
+        <div class="tache-section">
+            <div class="tache-title">🔧 Tâche : {{ tache.nom }}</div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Famille</th>
+                        <th>Description</th>
+                        <th>Dommages potentiels</th>
+                        <th>Gravité</th>
+                        <th>Fréquence</th>
+                        <th>Prévention existante</th>
+                        <th>Maîtrise</th>
+                        <th>Actions à mettre en œuvre</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for risque in tache.risques %}
+                    <tr class="
+                        {% if risque.score < 5 %}
+                            risque-vert
+                        {% elif risque.score < 9 %}
+                            risque-jaune
+                        {% else %}
+                            risque-rouge
+                        {% endif %}
+                    ">
+                        <td>{{ risque.famille_danger or "Non précisé" }}</td>
+                        <td>{{ risque.description }}</td>
+                        <td>{{ risque.dommages or "" }}</td>
+                        <td>{{ risque.gravite }}</td>
+                        <td>{{ risque.frequence }}</td>
+                        <td>{{ risque.mesures_prevention or "" }}</td>
+                        <td>{{ risque.maitrise }}</td>
+                        <td>{{ risque.actions_a_mener or "" }}</td>
+                        <td class="score-cell">{{ risque.score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+</div>
+
+</body>
+</html>

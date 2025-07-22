@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter un Risque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background:#f4f4f4; padding:2rem;">
+    <div class="container bg-white rounded shadow p-4" style="max-width:700px;">
+        <h2 class="mb-4">⚠️ Ajouter un Risque à la tâche : {{ tache.nom }}</h2>
+        <form method="POST">
+
+            <div class="mb-3">
+                <label for="famille_danger" class="form-label">Famille de danger</label>
+                <select class="form-select" id="famille_danger" name="famille_danger" required>
+                    <option disabled selected>-- Sélectionner une famille --</option>
+                    <option>1. Fumées, vapeurs, brouillards</option>
+                    <option>2. Exposition à des agents biologiques (bactéries...)</option>
+                    <option>3. Bruit ( >80 dB)</option>
+                    <option>4. Manipulation produits chimiques</option>
+                    <option>5. Glissade de plain-pied</option>
+                    <option>6. chute de hauteur</option>
+                    <option>7. co-activité engins/piétons</option>
+                    <option>8. co-activité VL-PL/piétons</option>
+                    <option>9. co activité engins/VL/PL</option>
+                    <option>10. mauvais éclairage (trop faible, trop fort)</option>
+                    <option>11. contact avec élement sous tension</option>
+                    <option>12. co-activité avec entreprise-extérieure</option>
+                    <option>13. contrainte ergonomiques ( postures/efforts/cognitif)</option>
+                    <option>14. matériaux combustibles, explosifs, inflammables</option>
+                    <option>15. espace confiné</option>
+                    <option>16. accès élément mobile sur machine</option>
+                    <option>17. Projections particules solide ou liquide</option>
+                    <option>18. chute éléments manipuler</option>
+                    <option>19. heurt, coupure, piqure</option>
+                    <option>20. manutention mécanique ( chariot élévateur,palan,...)</option>
+                    <option>21. Risque psycho-sociaux (stress)</option>
+                    <option>22. Travaux en extérieur</option>
+                    <option>23. Rayonnement laser</option>
+                    <option>24. Rayonnement UV</option>
+                    <option>25. contact piéces chaudes</option>
+                    <option>26. Contact piéces froides</option>
+                    <option>27. Travailleur isolé</option>
+                    <option>28. Autres</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Description du risque</label>
+                <input type="text" class="form-control" id="description" name="description" required>
+            </div>
+
+	    <div class="mb-3">
+    <label class="form-label">Équipements de protection (EPI)</label><br>
+    <div class="d-flex flex-wrap gap-3">
+        {% for epi in epis %}
+        <div class="text-center">
+            <label>
+                <input type="checkbox" name="epis[]" value="{{ epi }}" {% if epi in selected_epis %}checked{% endif %}>
+                <img src="{{ url_for('static', filename='img_EPI/' + epi) }}" alt="{{ epi }}" width="80" height="80">
+                <div style="font-size: 0.8rem;">{{ epi.rsplit('.', 1)[0] }}</div>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+            <div class="mb-3">
+                <label for="dommages" class="form-label">Dommages potentiels</label>
+                <textarea class="form-control" id="dommages" name="dommages" rows="2"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="mesures_prevention" class="form-label">Mesures de prévention existantes</label>
+                <textarea class="form-control" id="mesures_prevention" name="mesures_prevention" rows="2"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="gravite" class="form-label">Gravité</label>
+                <select name="gravite" class="form-select" required>
+  		  <option value="1">1. Blessure ou symptômes bénins, Pas ou peu de dommages sans arrêt de travail.</option>
+  		  <option value="2">2. Blessure ou symptômes demandant des soins médicaux sans arrêt de travail</option>
+  		  <option value="3">3. Blessure ou maladie provoquant un arrêt de travail, Dommages réversibles entrainant une incapacité partielle ou permanente</option>
+  		  <option value="4">4. Blessure ou maladie mortelle</option>
+		</select>
+            </div>
+
+            <div class="mb-3">
+                <label for="frequence" class="form-label">Fréquence</label>
+                <select name="frequence" class="form-select" required>
+  		  <option value="1">1. Exposition pouvant survenir au maximum une fois par an ou peu vraisemblablement ou jamais rencontrée.</option>
+  		  <option value="2">2. Exposition pouvant survenir au maximum plusieurs fois par an sur le lieu de travail</option>
+  		  <option value="3">3. Exposition pouvant survenir au maximum une fois par mois sur le lieu de travail</option>
+  		  <option value="4">4. Exposition pouvant survenir au maximum plusieurs fois par mois sur le lieu de travail</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="maitrise" class="form-label">Niveau de maîtrise</label>
+                <select class="form-select" id="maitrise" name="maitrise" required>
+                    <option value="1">Aucune mesure</option>
+                    <option value="0.75">Information</option>
+                    <option value="0.5">EPI</option>
+                    <option value="0.25">EPC</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="actions_a_mener" class="form-label">Actions à mettre en œuvre</label>
+                <textarea class="form-control" id="actions_a_mener" name="actions_a_mener" rows="2"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="responsable_action" class="form-label">Personne chargée de l'action</label>
+                <input type="text" class="form-control" id="responsable_action" name="responsable_action">
+            </div>
+
+	    <input type="hidden" id="poste_id" name="poste_id" value="">
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const tacheId = {{ tache.id }};
+    fetch(`/get_poste_by_tache/${tacheId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.poste_id) {
+                document.getElementById("poste_id").value = data.poste_id;
+            } else {
+                alert("Erreur : Poste non trouvé pour la tâche sélectionnée.");
+            }
+        });
+});
+</script>
+
+
+            <button type="submit" class="btn btn-warning w-100">Ajouter le risque</button>
+        </form>
+
+        <a href="{{ url_for('liste_postes') }}" class="btn btn-link mt-3">⬅ Retour</a>
+    </div>
+</body>
+</html>

@@ -49,12 +49,12 @@
         <h2>Panneau d'administration</h2>
         <p>Bienvenue, <strong>{{ current_user.username }}</strong> ({{ current_user.role }})</p>
 
-        <a href="{{ url_for('manage_users') }}" class="btn btn-success">👥 Gérer les utilisateurs</a>
+        <a href="{{ url_for('admin_users') }}" class="btn btn-success">👥 Gérer les utilisateurs</a>
         <a href="{{ url_for('edit_sections') }}" class="btn btn-warning">📝 Modifier les contenus QSE</a>
         <a href="{{ url_for('admin_messages') }}" class="btn btn-info">📬 Voir les messages reçus</a>
+        <a href="{{ url_for('admin_stats') }}" class="btn btn-outline-info">📊 Statistiques du site</a>
         <a href="{{ url_for('dashboard') }}" class="btn btn-primary">← Retour au tableau de bord</a>
         <a href="{{ url_for('logout') }}" class="btn btn-dark">Se déconnecter</a>
     </div>
 </body>
 </html>
-

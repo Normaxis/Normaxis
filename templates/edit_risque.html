@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier un Risque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background:#f4f4f4; padding:2rem;">
+    <div class="container bg-white rounded shadow p-4" style="max-width:700px;">
+        <h2 class="mb-4">✏️ Modifier le Risque pour la tâche : {{ risque.tache.nom }}</h2>
+        <form method="POST">
+
+            <!-- Famille de danger -->
+            <div class="mb-3">
+                <label for="famille_danger" class="form-label">Famille de danger</label>
+                {% set options = [
+                    "1. Fumées, vapeurs, brouillards",
+                    "2. Exposition à des agents biologiques (bactéries...)",
+                    "3. Bruit ( >80 dB)",
+                    "4. Manipulation produits chimiques",
+                    "5. Glissade de plain-pied",
+                    "6. chute de hauteur",
+                    "7. co-activité engins/piétons",
+                    "8. co-activité VL-PL/piétons",
+                    "9. co activité engins/VL/PL",
+                    "10. mauvais éclairage (trop faible, trop fort)",
+                    "11. contact avec élement sous tension",
+                    "12. co-activité avec entreprise-extérieure",
+                    "13. contrainte ergonomiques ( postures/efforts/cognitif)",
+                    "14. matériaux combustibles, explosifs, inflammables",
+                    "15. espace confiné",
+                    "16. accès élément mobile sur machine",
+                    "17. Projections particules solide ou liquide",
+                    "18. chute éléments manipuler",
+                    "19. heurt, coupure, piqure",
+                    "20. manutention mécanique ( chariot élévateur,palan,...)",
+                    "21. Risque psycho-sociaux (stress)",
+                    "22. Travaux en extérieur",
+                    "23. Rayonnement laser",
+                    "24. Rayonnement UV",
+                    "25. contact piéces chaudes",
+                    "26. Contact piéces froides",
+                    "27. Travailleur isolé",
+                    "28. Autres"
+                ] %}
+                <select class="form-select" id="famille_danger" name="famille_danger" required>
+                    <option disabled>-- Sélectionner une famille --</option>
+                    {% for option in options %}
+                        <option value="{{ option }}" {% if risque.famille_danger == option %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-3">
+                <label for="description" class="form-label">Description du risque</label>
+                <input type="text" class="form-control" id="description" name="description" value="{{ risque.description }}" required>
+            </div>
+	    
+	    <div class="mb-3">
+    <label class="form-label">Équipements de protection (EPI)</label><br>
+    <div class="d-flex flex-wrap gap-3">
+        {% for epi in epis %}
+        <div class="text-center">
+            <label>
+                <input type="checkbox" name="epis" value="{{ epi }}" {% if epi in selected_epis %}checked{% endif %}>
+                <img src="{{ url_for('static', filename='img_EPI/' + epi) }}" alt="{{ epi }}" width="80" height="80">
+                <div style="font-size: 0.8rem;">{{ epi.rsplit('.', 1)[0] }}</div>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+            <!-- Dommages -->
+            <div class="mb-3">
+                <label for="dommages_potentiels" class="form-label">Dommages potentiels</label>
+                <textarea class="form-control" id="dommages_potentiels" name="dommages_potentiels" rows="2">{{ risque.dommages }}</textarea>
+            </div>
+
+            <!-- Mesures de prévention -->
+            <div class="mb-3">
+                <label for="mesures_prevention" class="form-label">Mesures de prévention existantes</label>
+                <textarea class="form-control" id="mesures_prevention" name="mesures_prevention" rows="2">{{ risque.mesures_prevention }}</textarea>
+            </div>
+
+            <!-- Gravité -->
+            <div class="mb-3">
+                <label for="gravite" class="form-label">Gravité</label>
+                <select class="form-select" id="gravite" name="gravite" required>
+                    {% for val, label in [(1, "1 - Faible"), (2, "2 - Moyenne"), (3, "3 - Grave"), (4, "4 - Très grave")] %}
+                        <option value="{{ val }}" {% if risque.gravite == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Fréquence -->
+            <div class="mb-3">
+                <label for="frequence" class="form-label">Fréquence</label>
+                <select class="form-select" id="frequence" name="frequence" required>
+                    {% for val, label in [(1, "1 - Très rare"), (2, "2 - Rare"), (3, "3 - Fréquent"), (4, "4 - Très fréquent")] %}
+                        <option value="{{ val }}" {% if risque.frequence == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Maîtrise -->
+            <div class="mb-3">
+                <label for="maitrise" class="form-label">Niveau de maîtrise</label>
+                <select class="form-select" id="maitrise" name="maitrise" required>
+                    {% for val, label in [(1, "Aucune mesure"), (0.75, "Information"), (0.5, "EPI"), (0.25, "EPC")] %}
+                        <option value="{{ val }}" {% if risque.maitrise == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Actions -->
+            <div class="mb-3">
+                <label for="actions_a_mener" class="form-label">Actions à mettre en œuvre</label>
+                <textarea class="form-control" id="actions_a_mener" name="actions_a_mener" rows="2">{{ risque.actions_a_mener }}</textarea>
+            </div>
+
+            <!-- Responsable -->
+            <div class="mb-3">
+                <label for="responsable_action" class="form-label">Personne chargée de l'action</label>
+                <input type="text" class="form-control" id="responsable_action" name="responsable_action" value="{{ risque.responsable_action }}">
+            </div>
+
+            <!-- Réalisée -->
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="etat_action" name="etat_action" {% if risque.etat_action %}checked{% endif %}>
+                <label class="form-check-label" for="etat_action">Action réalisée</label>
+            </div>
+
+            <!-- Coût -->
+            <div class="mb-3">
+                <label for="cout_action" class="form-label">Coût de l'action (€)</label>
+                <input type="number" step="0.01" class="form-control" id="cout_action" name="cout_action" value="{{ risque.cout_action or '' }}">
+            </div>
+
+            <!-- Délai -->
+            <div class="mb-3">
+                <label for="delai" class="form-label">Délai de mise en œuvre</label>
+                <input type="text" class="form-control" id="delai" name="delai" value="{{ risque.delai_mise_en_oeuvre }}">
+            </div>
+
+            <!-- Date de réalisation -->
+            <div class="mb-3">
+                <label for="date_realisation" class="form-label">Date de réalisation</label>
+                <input type="date" class="form-control" id="date_realisation" name="date_realisation" value="{{ risque.date_realisation }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">✅ Enregistrer les modifications</button>
+        </form>
+
+        <a href="{{ url_for('liste_postes') }}" class="btn btn-link mt-3">⬅ Retour</a>
+    </div>
+</body>
+</html>

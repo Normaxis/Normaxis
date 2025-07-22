@@ -71,14 +71,9 @@
             text-decoration: underline;
         }
 
-        .btn-logout {
+        .btn-logout, .btn-contact {
+            width: 100%;
             margin-top: 20px;
-            width: 100%;
-        }
-
-        .btn-contact {
-            margin-top: 40px;
-            width: 100%;
         }
 
         .content {
@@ -124,83 +119,102 @@
             height: 80px;
             width: auto;
         }
+
+        .alert-access {
+            background-color: #e7f8ff;
+            border-left: 5px solid #17a2b8;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
     </style>
 </head>
 <body>
-    <div class="dashboard">
-        <div class="sidebar">
-            <h4>📁 Thèmes</h4>
+<div class="dashboard">
+    <div class="sidebar">
+        <h4>📁 Thèmes</h4>
 
-            {% for theme, sections in theme_content.items() %}
-            <div class="mb-4">
-                <strong>{{ theme.capitalize() }}</strong>
-                <ul>
-                    {% for section in sections %}
-                    <li><a class="nav-link" onclick="showSection('section-{{ section.id }}')">{{ section.title }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endfor %}
+        {% for theme, sections in theme_content.items() %}
+            {% if sections %}
+                <div class="mb-4">
+                    <strong>{{ theme|capitalize }}</strong>
+                    <ul>
+                        {% for section in sections %}
+                            <li><a class="nav-link" onclick="showSection('section-{{ section.id }}')">{{ section.title }}</a></li>
+                        {% endfor %}
+                        {% if theme == 'securite' %}
+                            <li><a class="nav-link" href="{{ url_for('liste_postes') }}">🛠️ Générateur DUERP (Postes & Risques)</a></li>
+			    <li><a class="nav-link" href="{{ url_for('papripact') }}">📋 Programme Annuel de Prévention (PAPRIPACT)</a></li>
+			    <li><a href="{{ url_for('liste_accidents') }}">Accidents de Travail</a></li>
+			    <li><a class="nav-link" href="{{ url_for('fiche_securite_liste') }}">📑 Fiches Sécurité au Poste (FSP)</a></li>
+			    <a href="{{ url_for('liste_fds') }}" class="btn btn-outline-info">
+  📂 Accéder aux FDS
+</a>
 
-            <a href="{{ url_for('contact') }}" class="btn btn-outline-primary btn-contact">📩 Contact</a>
-            <a href="{{ url_for('logout') }}" class="btn btn-dark btn-logout">🚪 Se déconnecter</a>
-        </div>
-
-        <div class="content">
-            <div class="section active" id="home">
-                <div class="logo-title">
-                    <img src="/static/logo_normaxis.png" alt="Logo Normaxis">
-                    <h2>Bienvenue, {{ current_user.username }}</h2>
+                        {% endif %}
+                    </ul>
                 </div>
-                <p>
-                    Bienvenue sur <strong>Normaxis</strong>, votre plateforme dédiée à l'accompagnement en matière de santé, sécurité, qualité et environnement au travail.
-                    Ce site a été conçu pour vous aider à comprendre, mettre en place et suivre les éléments clés de votre démarche de prévention des risques :
-                </p>
-                <ul>
-                    <li><strong>Évaluation des Risques Professionnels (EVRP)</strong></li>
-                    <li><strong>Dossier Unique d’Évaluation des Risques Professionnels (DUERP)</strong></li>
-                    <li><strong>Politiques QHSE</strong> (Qualité, Hygiène, Sécurité, Environnement)</li>
-                    <li><strong>Conformité réglementaire</strong> et obligations de l’employeur</li>
-                </ul>
-                <p>
-                    Grâce à un ensemble de contenus thématiques (vidéos, documents à télécharger, fiches pratiques), vous pouvez accéder aux ressources adaptées à vos besoins selon vos droits : sécurité, qualité ou environnement.
-                </p>
-                <p>
-                    Utilisez le menu à gauche pour commencer votre navigation. Pour toute question, cliquez sur le bouton "Contact".
-                </p>
-            </div>
-
-            {% for theme, sections in theme_content.items() %}
-                {% for section in sections %}
-                    <div class="section" id="section-{{ section.id }}">
-                        <h4>{{ section.title }}</h4>
-                        <p>{{ section.content }}</p>
-
-                        {% if section.video_url %}
-                            <video controls>
-                                <source src="{{ section.video_url }}" type="video/mp4">
-                                Votre navigateur ne supporte pas la lecture vidéo.
-                            </video>
-                        {% endif %}
-
-                        {% if section.file_path %}
-                            <a href="{{ section.file_path }}" class="download-link" download>📄 Télécharger le fichier</a>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            {% endfor %}
-        </div>
+            {% endif %}
+        {% endfor %}
+        <a href="{{ url_for('abonnements') }}" class="btn btn-outline-primary w-100">💼 Voir les packs d'abonnement</a>
+        <a href="{{ url_for('contact') }}" class="btn btn-outline-primary btn-contact">📩 Contact</a>
+	<a href="{{ url_for('profil', id=current_user.id) }}" class="btn btn-outline-dark w-100 my-2">👤 Mon Profil</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-dark btn-logout">🚪 Se déconnecter</a>
     </div>
 
-    <script>
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
-            const target = document.getElementById(id);
-            if (target) {
-                target.classList.add('active');
-                target.scrollIntoView({ behavior: 'smooth' });
-            }
+    <div class="content">
+        <div class="section active" id="home">
+            <div class="logo-title">
+                <img src="/static/logo_normaxis.png" alt="Logo Normaxis">
+                <h2>Bienvenue, {{ current_user.username }}</h2>
+            </div>
+            <p>
+                Bienvenue sur <strong>Normaxis</strong>, votre plateforme dédiée à la santé, sécurité, qualité et environnement au travail.
+                Ce site vous aide à comprendre, mettre en place et suivre les éléments clés de votre démarche de prévention des risques :
+            </p>
+            <ul>
+                <li><strong>Évaluation des Risques Professionnels (EVRP)</strong></li>
+                <li><strong>Dossier Unique d’Évaluation des Risques Professionnels (DUERP)</strong></li>
+                <li><strong>Politiques QHSE</strong> (Qualité, Hygiène, Sécurité, Environnement)</li>
+                <li><strong>Conformité réglementaire</strong> et obligations de l’employeur</li>
+            </ul>
+            <p>
+                Utilisez le menu à gauche pour commencer votre navigation. Pour toute question, cliquez sur "Contact".
+            </p>
+        </div>
+
+        {% for theme, sections in theme_content.items() %}
+            {% for section in sections %}
+                <div class="section" id="section-{{ section.id }}">
+                    <h4>{{ section.title }}</h4>
+                    <p>{{ section.content }}</p>
+
+                    {% if section.video_url %}
+                        <video controls>
+                            <source src="{{ section.video_url }}" type="video/mp4">
+                            Votre navigateur ne supporte pas la lecture vidéo.
+                        </video>
+                    {% else %}
+                        <p class="text-muted">Aucune vidéo disponible pour cette section.</p>
+                    {% endif %}
+
+                    {% if section.file_path %}
+                        <a href="{{ section.file_path }}" class="download-link" download>📄 Télécharger le fichier</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function showSection(id) {
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+        const target = document.getElementById(id);
+        if (target) {
+            target.classList.add('active');
+            target.scrollIntoView({ behavior: 'smooth' });
         }
-    </script>
+    }
+</script>
 </body>
 </html>

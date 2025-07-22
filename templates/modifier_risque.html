@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier le Risque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light py-5">
+    <div class="container bg-white shadow rounded p-4" style="max-width:600px;">
+        <h2>✏️ Modifier le Risque</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <select name="frequence" class="form-select" required>
+  		  <option value="1">1. Exposition pouvant survenir au maximum une fois par an ou peu vraisemblablement ou jamais rencontrée.</option>
+  		  <option value="2">2. Exposition pouvant survenir au maximum plusieurs fois par an sur le lieu de travail</option>
+  		  <option value="3">3. Exposition pouvant survenir au maximum une fois par mois sur le lieu de travail</option>
+  		  <option value="4">4. Exposition pouvant survenir au maximum plusieurs fois par mois sur le lieu de travail</option>
+		</select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Fréquence</label>
+                <input type="number" name="frequence" class="form-control" value="{{ risque.frequence }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Gravité</label>
+                <select name="gravite" class="form-select" required>
+  		  <option value="1">1. Blessure ou symptômes bénins, Pas ou peu de dommages sans arrêt de travail.</option>
+  		  <option value="2">2. Blessure ou symptômes demandant des soins médicaux sans arrêt de travail</option>
+  		  <option value="3">3. Blessure ou maladie provoquant un arrêt de travail, Dommages réversibles entrainant une incapacité partielle ou permanente</option>
+  		  <option value="4">4. Blessure ou maladie mortelle</option>
+		 </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Niveau de Maîtrise</label>
+                <select name="maitrise" class="form-select" required>
+                    <option value="1" {% if risque.maitrise == 1 %}selected{% endif %}>Rien</option>
+                    <option value="0.75" {% if risque.maitrise == 0.75 %}selected{% endif %}>Information</option>
+                    <option value="0.5" {% if risque.maitrise == 0.5 %}selected{% endif %}>EPI</option>
+                    <option value="0.25" {% if risque.maitrise == 0.25 %}selected{% endif %}>EPC</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">💾 Enregistrer</button>
+        </form>
+        <a href="{{ url_for('liste_postes') }}" class="btn btn-link mt-3">⬅ Retour</a>
+    </div>
+</body>
+</html>

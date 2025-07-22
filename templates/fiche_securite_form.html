@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">{{ "Modifier" if fiche else "Créer" }} une fiche de sécurité</h2>
+  <form method="POST" enctype="multipart/form-data">
+    
+    <!-- 1. Titre -->
+    <div class="mb-4">
+      <label for="titre" class="form-label">Titre de la fiche</label>
+      <input type="text" name="titre" class="form-control" id="titre" required value="{{ fiche.titre if fiche else '' }}">
+    </div>
+
+    <!-- 2. Photo -->
+    <div class="mb-4">
+      <label class="form-label">Photo du poste</label>
+      <input type="file" name="photo_poste" class="form-control">
+      {% if fiche and fiche.photo_poste %}
+        <img src="{{ url_for('static', filename='uploads/' ~ fiche.photo_poste) }}" class="mt-2" style="max-width: 200px;">
+      {% endif %}
+    </div>
+
+    <hr>
+
+    <!-- 3. Poste -->
+    <h4>Poste</h4>
+    <div class="row mb-3">
+      <div class="col">
+        <label class="form-label">Intitulé</label>
+        <input type="text" name="poste_nom" class="form-control" required value="{{ fiche.poste_nom if fiche else '' }}">
+      </div>
+      <div class="col">
+        <label class="form-label">Lieu</label>
+        <input type="text" name="poste_lieu" class="form-control" required value="{{ fiche.poste_lieu if fiche else '' }}">
+      </div>
+      <div class="col">
+        <label class="form-label">Responsable</label>
+        <input type="text" name="poste_responsable" class="form-control" value="{{ fiche.poste_responsable if fiche else '' }}">
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- 4. Tâches -->
+    <h4>Description des tâches</h4>
+    <textarea name="taches" class="form-control mb-3" rows="3">{{ fiche.taches if fiche else '' }}</textarea>
+    
+    <!-- 5. Risques -->
+    <h4 class="mt-4">2. Familles de dangers</h4>
+<div class="row">
+    {% for danger in dangers_disponibles %}
+    <div class="col-md-3 text-center mb-4">
+        <label>
+            <input type="checkbox" name="dangers" value="{{ danger }}"
+                   {% if fiche and fiche.dangers and danger in fiche.dangers %}checked{% endif %}>
+            <img src="{{ url_for('static', filename='img_dangers/' + danger) }}"
+                 alt="{{ danger }}"
+                 class="img-thumbnail"
+                 style="max-height: 100px;">
+            <div class="mt-1">{{ danger.rsplit('.', 1)[0].replace('_', ' ') }}</div>
+        </label>
+    </div>
+    {% endfor %}
+</div>
+    <h4>Risques identifiés</h4>
+    {% for i in range(5) %}
+      <div class="mb-2">
+        <label>Risque {{ i + 1 }}</label>
+        <input type="text" name="risque_desc_{{ i }}" class="form-control"
+               value="{{ fiche.risques[i] if fiche and fiche.risques and fiche.risques|length > i else '' }}">
+      </div>
+    {% endfor %}
+
+    <hr>
+
+    <!-- 6. Équipements de protection -->
+    <h4>Équipements de protection individuelle (EPI)</h4>
+    <div class="row">
+      {% set selected_epis = fiche.epis if fiche and fiche.epis else [] %}
+      {% for filename in epis_disponibles %}
+        <div class="col-md-3 text-center mb-4">
+          <label>
+            <img src="{{ url_for('static', filename='img_EPI/' ~ filename) }}"
+                 alt="{{ filename }}"
+                 class="img-thumbnail mb-2"
+                 style="max-height: 100px;">
+            <br>
+            <input type="checkbox"
+                   name="epis"
+                   value="{{ filename }}"
+                   {% if filename in selected_epis %}checked{% endif %}>
+            {{ filename.replace('.png', '') }}
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+
+    <hr>
+
+    <!-- 7. Infos complémentaires -->
+    <div class="mb-3">
+      <label>Conduite à tenir en cas d’accident</label>
+      <textarea name="accident" class="form-control" rows="3">{{ fiche.accident if fiche else '' }}</textarea>
+    </div>
+
+    <div class="mb-3">
+      <label>Règles de sécurité spécifiques</label>
+	<h4 class="mt-4">6. Règles d'interdiction spécifiques</h4>
+<div class="row">
+    {% for interdiction in interdictions_disponibles %}
+    <div class="col-md-3 text-center mb-4">
+        <label>
+            <input type="checkbox" name="interdictions" value="{{ interdiction }}"
+                   {% if fiche and fiche.interdictions and interdiction in fiche.interdictions %}checked{% endif %}>
+            <img src="{{ url_for('static', filename='img_interdictions/' + interdiction) }}"
+                 alt="{{ interdiction }}"
+                 class="img-thumbnail"
+                 style="max-height: 100px;">
+            <div class="mt-1">{{ interdiction.rsplit('.', 1)[0].replace('_', ' ') }}</div>
+        </label>
+    </div>
+    {% endfor %}
+</div>
+
+      <textarea name="regles" class="form-control" rows="3">{{ fiche.regles if fiche else '' }}</textarea>
+    </div>
+
+    <div class="mb-3">
+      <label>Informations réglementaires</label>
+      <textarea name="infos_reglementaires" class="form-control" rows="3">{{ fiche.infos_reglementaires if fiche else '' }}</textarea>
+    </div>
+    <div class="mb-3">
+  <label for="fds_ids">📎 Fiches de Données de Sécurité associées</label>
+  <select class="form-control" name="fds_ids" multiple size="6">
+    {% for fds in fds_disponibles %}
+      <option value="{{ fds.id }}"
+        {% if fiche and fds in fiche.fds_associees %}selected{% endif %}>
+        {{ fds.nom_produit }} — {{ fds.fournisseur or "Sans fournisseur" }}
+      </option>
+    {% endfor %}
+  </select>
+  <small class="form-text text-muted">Maintenez Ctrl (Windows) ou Cmd (Mac) pour en sélectionner plusieurs.</small>
+</div>
+    <hr>
+
+    <!-- 8. Boutons -->
+    <div class="d-flex justify-content-between">
+      <a href="{{ url_for('fiche_securite_liste') }}" class="btn btn-secondary">Annuler</a>
+      <button type="submit" class="btn btn-primary">Sauvegarder la fiche</button>
+    </div>
+
+  </form>
+</div>
+{% endblock %}

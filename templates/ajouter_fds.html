@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>📤 Ajouter une Fiche de Données de Sécurité</h2>
+
+<form method="POST" enctype="multipart/form-data" class="p-4 border rounded bg-light shadow-sm">
+  <div class="mb-3">
+    <label for="nom_produit">🧪 Nom du produit</label>
+    <input type="text" class="form-control" id="nom_produit" name="nom_produit" required>
+  </div>
+  <div class="mb-3">
+    <label for="fournisseur">🏢 Fournisseur</label>
+    <input type="text" class="form-control" id="fournisseur" name="fournisseur">
+  </div>
+  <div class="mb-3">
+    <label for="date_fds">📅 Date de la FDS</label>
+    <input type="date" class="form-control" id="date_fds" name="date_fds" required>
+  </div>
+  <div class="mb-3">
+    <label for="numero_version">🔢 Numéro de version</label>
+    <input type="text" class="form-control" id="numero_version" name="numero_version">
+  </div>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="dangereux" name="dangereux">
+    <label class="form-check-label" for="dangereux">
+      ⚠️ Produit dangereux
+    </label>
+  </div>
+  <div class="mb-3">
+    <label for="fichier_pdf">📁 Fichier PDF</label>
+    <input type="file" class="form-control" id="fichier_pdf" name="fichier_pdf" accept=".pdf" required>
+  </div>
+  <button type="submit" class="btn btn-success">Ajouter la FDS</button>
+</form>
+
+{% endblock %}

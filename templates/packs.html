@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Choisir un pack – Normaxis</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-image: url('/static/marbre.jpg');
+      background-size: cover;
+      background-position: center;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .btn {
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="bg-light">
+<div class="container py-5">
+  <h1 class="mb-4">Choisissez votre pack</h1>
+  <div class="row gy-4 justify-content-center">
+
+    <div class="col-md-5">
+      <div class="card p-4 text-center">
+        <h3>Pack Sécurité <small class="text-muted">(Basic)</small></h3>
+        <p class="my-3">Accès complet au contenu Sécurité</p>
+        <h4 class="mb-4 text-success">9,99 €/mois</h4>
+        <button class="btn btn-primary w-100" id="buy-basic">Souscrire</button>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+      <div class="card p-4 text-center">
+        <h3>Pack Qualité <small class="text-muted">(Premium)</small></h3>
+        <p class="my-3">Accès complet au contenu Qualité</p>
+        <h4 class="mb-4 text-success">14,99 €/mois</h4>
+        <button class="btn btn-primary w-100" id="buy-premium">Souscrire</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const stripe = Stripe("{{ publishable_key }}");
+
+document.getElementById('buy-basic')
+  .addEventListener('click', () => createCheckoutSession("{{ price_basic }}"));
+
+document.getElementById('buy-premium')
+  .addEventListener('click', () => createCheckoutSession("{{ price_premium }}"));
+
+function createCheckoutSession(priceId) {
+  fetch("/create-checkout-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ price_id: priceId })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.id) {
+      stripe.redirectToCheckout({ sessionId: data.id });
+    } else {
+      alert("Erreur Stripe : " + data.error);
+    }
+  })
+  .catch(err => alert("Erreur : " + err.message));
+}
+</script>
+</body>
+</html>

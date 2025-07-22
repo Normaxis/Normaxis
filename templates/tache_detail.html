@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Détail de la tâche : {{ tache.nom }}</h2>
+    <p><strong>Description :</strong> {{ tache.description }}</p>
+
+    <h3>Liste des risques associés</h3>
+    {% if risques %}
+        <ul>
+            {% for risque in risques %}
+                <li>
+                    <strong>{{ risque.description }}</strong><br>
+                    Fréquence : {{ risque.frequence }},
+                    Gravité : {{ risque.gravite }},
+                    Maîtrise : {{ risque.maitrise }},
+                    Score : {{ risque.score }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Aucun risque associé à cette tâche.</p>
+    {% endif %}
+
+    <a href="{{ url_for('ajouter_risque', id=id) }}" class="btn btn-primary">Ajouter un risque</a>
+    <br><br>
+    <a href="{{ url_for('postes') }}" class="btn btn-secondary">Retour à la liste des postes</a>
+</div>
+{% endblock %}

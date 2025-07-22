@@ -1,4 +1,4 @@
-V<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -29,11 +29,30 @@ V<!DOCTYPE html>
             <label for="video" class="form-label">Vidéo (facultative)</label>
             <input type="file" name="video" class="form-control">
         </div>
+
+        {% if section and section.video_url %}
+        <div class="mb-3">
+            <label class="form-label">Vidéo actuelle :</label><br>
+            <video width="100%" height="auto" controls>
+                <source src="{{ url_for('static', filename=section.video_url) }}" type="video/mp4">
+                Votre navigateur ne supporte pas la vidéo.
+            </video>
+        </div>
+        {% endif %}
         
         <div class="mb-3">
             <label for="file" class="form-label">Fichier (facultatif)</label>
             <input type="file" name="file" class="form-control">
         </div>
+
+        {% if section and section.file_path %}
+        <div class="mb-3">
+            <label class="form-label">Fichier actuel :</label><br>
+            <a href="{{ url_for('static', filename=section.file_path) }}" class="btn btn-outline-primary" download>
+                📄 Télécharger le fichier existant
+            </a>
+        </div>
+        {% endif %}
         
         <button type="submit" class="btn btn-success">💾 Enregistrer</button>
         <a href="{{ url_for('admin_sections', theme=theme) }}" class="btn btn-secondary">Annuler</a>
@@ -42,4 +61,3 @@ V<!DOCTYPE html>
 
 </body>
 </html>
-

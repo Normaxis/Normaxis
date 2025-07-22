@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Arbre des Causes - Prototype</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drawflow@0.0.50/dist/drawflow.min.css">
+    <style>
+        body {
+            margin: 0;
+            background-image: url("/static/marbre.jpg");
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+
+        .drawflow {
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(255,255,255,0.8);
+        }
+
+        .drawflow-node {
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        .drawflow-node input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .drawflow-node[data-node="fait"] {
+            background: #d0e8ff;
+            border: 2px solid #007bff;
+        }
+
+        .drawflow-node[data-node="fait_ultime"] {
+            background: #ffe5e5;
+            border: 2px solid #cc0000;
+        }
+
+        #toolbar {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 999;
+        }
+
+        #toolbar button {
+            padding: 10px 15px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 6px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        #toolbar button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div id="toolbar">
+    <button onclick="addNode()">➕ Ajouter un fait</button>
+    <button onclick="saveDrawflow()">💾 Sauvegarder</button>
+</div>
+
+<div id="drawflow" class="drawflow"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/drawflow@0.0.50/dist/drawflow.min.js"></script>
+<script>
+    const container = document.getElementById('drawflow');
+    const editor = new Drawflow(container);
+    editor.reroute = true;
+    editor.editor_mode = "edit";
+    editor.start();
+
+    let nodeCounter = 1;
+
+    // Fait ultime par défaut
+    window.addEventListener('DOMContentLoaded', () => {
+        const htmlContent = `
+            <div style="text-align:center;">
+                <strong style="color:red;">⚠️ Fait ultime</strong><br/>
+                <input type="text" df-name placeholder="Décrire l'accident..." />
+            </div>
+        `;
+        editor.addNode(
+            'fait_ultime',
+            1, 1,
+            500, 200,
+            'fait_ultime',
+            { name: '' },
+            htmlContent
+        );
+    });
+
+    // Ajouter un fait (bulle bleue)
+    function addNode() {
+        const htmlContent = `
+            <div>
+                <label>Fait ${nodeCounter}</label>
+                <input type="text" df-name placeholder="Décrire un fait ou cause..." />
+            </div>
+        `;
+        editor.addNode(
+            'fait',
+            1, 1,
+            100 + nodeCounter * 30,
+            300 + nodeCounter * 20,
+            'fait',
+            { name: '' },
+            htmlContent
+        );
+        nodeCounter++;
+    }
+
+    // Sauvegarder le JSON dans la console
+    function saveDrawflow() {
+        const data = editor.export();
+        console.log("🧠 Arbre des causes JSON :", data);
+        alert("L'arbre des causes a été sauvegardé dans la console.");
+    }
+
+    // Mise à jour live du texte dans les blocs
+    container.addEventListener('input', function (e) {
+        if (e.target.matches('input[df-name]')) {
+            const nodeId = e.target.closest(".drawflow-node").id.replace("node-", "");
+            editor.drawflow.drawflow["Home"].data[nodeId].data.name = e.target.value;
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Détail de la Tâche</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background:#f4f4f4; padding:2rem;">
+    <div class="container bg-white rounded shadow p-4">
+        <h2>📋 Tâche : {{ tache.nom }}</h2>
+        <p><strong>Poste associé :</strong> {{ tache.poste.nom }}</p>
+
+        <hr>
+
+        <h4>⚠️ Risques associés</h4>
+        {% if tache.risques %}
+            <ul class="list-group">
+                {% for risque in tache.risques %}
+                    <li class="list-group-item">
+                        <strong>{{ risque.description }}</strong><br>
+                        Gravité : {{ risque.gravite }} |
+                        Fréquence : {{ risque.frequence }} |
+                        Maîtrise : {{ risque.maitrise }} |
+                        <strong>Score : {{ risque.score }}</strong>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted">Aucun risque défini pour cette tâche.</p>
+        {% endif %}
+
+        <a href="{{ url_for('ajouter_risque', id=id) }}" class="btn btn-warning mt-3">➕ Ajouter un risque</a>
+        <br>
+        <a href="{{ url_for('liste_postes') }}" class="btn btn-link mt-3">⬅ Retour à la liste des postes</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Postes et Évaluation des Risques</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('/static/marbre.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .btn-ajouter {
+            font-weight: 500;
+            border-radius: 10px;
+        }
+
+        .poste-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(4px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .poste-card h5 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-message {
+            text-align: center;
+            font-style: italic;
+            color: #555;
+            margin-top: 2rem;
+        }
+
+        .btn-retour {
+            margin-bottom: 1rem;
+        }
+
+        ul.list-group {
+            margin-top: 1rem;
+        }
+
+        .risque-item {
+            padding: 0.5rem 1rem;
+            margin-top: 0.5rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid;
+        }
+
+        .risque-vert {
+            background-color: #e8f5e9;
+            border-color: #28a745;
+        }
+
+        .risque-jaune {
+            background-color: #fff8e1;
+            border-color: #ffc107;
+        }
+
+        .risque-rouge {
+            background-color: #ffe5e5;
+            border-color: #dc3545;
+        }
+
+        .risque-item small {
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .btn-risque {
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-retour">⬅️ Retour au tableau de bord</a>
+
+    <h2>📋 Postes et Évaluation des Risques</h2>
+
+    {% if postes %}
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{{ url_for('nouveau_poste') }}" class="btn btn-outline-dark btn-ajouter">➕ Ajouter un nouveau poste</a>
+	    <a href="{{ url_for('historique_duerp') }}" class="btn btn-outline-secondary mb-3">
+  📚 Voir l’historique des DUERP archivés
+</a>
+            <a href="{{ url_for('duerps') }}" class="btn btn-dark">📄 Générer le Document Unique</a>
+        </div>
+
+        {% for poste in postes %}
+            <div class="poste-card">
+                <h5>📌 {{ poste.nom }}</h5>
+                <p>{{ poste.description }}</p>
+
+                <div class="d-flex flex-wrap mt-3">
+                    <a href="{{ url_for('modifier_poste', id=poste.id) }}" class="btn btn-sm btn-outline-primary me-2 mb-2">✏️ Modifier</a>
+                    <form action="{{ url_for('supprimer_poste', id=poste.id) }}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger me-2 mb-2" onclick="return confirm('Confirmer la suppression ?');">
+                            🗑️ Supprimer
+                        </button>
+                    </form>
+                    <a href="{{ url_for('ajouter_tache', poste_id=poste.id) }}" class="btn btn-sm btn-outline-success me-2 mb-2">➕ Tâche</a>
+
+                </div>
+
+                {% if poste.taches %}
+                    <div class="mt-3">
+                        <strong>🔧 Tâches :</strong>
+                        <ul class="list-group">
+                            {% for tache in poste.taches %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>{{ tache.nom }}</span>
+                                        <a href="{{ url_for('ajouter_risque', tache_id=tache.id) }}" class="btn btn-sm btn-outline-warning">⚠️ Ajouter un risque</a>
+                                    </div>
+
+                                    {% if tache.risques %}
+                                        <div class="mt-2">
+                                            {% for risque in tache.risques %}
+                                                <div class="risque-item
+                                                    {% if risque.score < 5 %} risque-vert
+                                                    {% elif risque.score < 9 %} risque-jaune
+                                                    {% else %} risque-rouge
+                                                    {% endif %}
+                                                ">
+                                                    <strong>🧱 {{ risque.description }}</strong><br>
+                                                    <small class="text-muted">👁 Famille : {{ risque.famille_danger }}</small><br>
+                                                    <small>
+                                                        Gravité : {{ risque.gravite }} —
+                                                        Fréquence : {{ risque.frequence }} —
+                                                        Maîtrise : {{ risque.maitrise }} —
+                                                        Score : <strong>{{ risque.score }}</strong>
+                                                    </small><br>
+                                                    <div class="mt-1">
+                                                        <a href="{{ url_for('edit_risque', id=risque.id) }}" class="btn btn-sm btn-outline-secondary btn-risque">✏ Modifier</a>
+                                                        <form action="{{ url_for('supprimer_risque', id=risque.id) }}" method="post" style="display:inline;">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger btn-risque" onclick="return confirm('Supprimer ce risque ?');">
+                                                                🗑️ Supprimer
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <p class="text-muted mt-2 ms-2">Aucun risque défini pour cette tâche.</p>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="empty-message">Aucun poste enregistré pour le moment.</p>
+        <div class="text-center">
+            <a href="{{ url_for('nouveau_poste') }}" class="btn btn-success mt-3">➕ Créer un premier poste</a>
+        </div>
+    {% endif %}
+</div>

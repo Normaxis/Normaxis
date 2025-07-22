@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Programme Annuel de Prévention (PAPRIPACT)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .clickable-row {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body style="background:#f4f4f4; padding:2rem;">
+    <div class="container bg-white rounded shadow p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📝 Programme Annuel de Prévention (PAPRIPACT)</h2>
+            <div>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary me-2">🏠 Retour au Dashboard</a>
+                <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimer</button>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped align-middle text-center">
+            <thead class="table-light">
+                <tr>
+                    <th>Description du Risque</th>
+                    <th>Dommages</th>
+                    <th>Mesures de Prévention</th>
+                    <th>Actions à mettre en œuvre</th>
+                    <th>Responsable</th>
+                    <th>Délais</th>
+                    <th>Réalisé</th>
+                    <th>Coût (€)</th>
+                    <th>
+  			<a href="{{ url_for('papripact', tri='score', ordre='desc' if request.args.get('ordre') == 'asc' else 'asc') }}" class="text-decoration-none text-dark">
+    Score 
+    {% if request.args.get('tri') == 'score' %}
+      {% if request.args.get('ordre') == 'asc' %}⬆{% else %}⬇{% endif %}
+    {% endif %}
+  </a>
+</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for risque in risques %}
+                {% set color_class = 
+                    'table-success' if risque.score < 6 else 
+                    'table-warning' if risque.score < 12 else 
+                    'table-danger' %}
+                <tr class="clickable-row {{ color_class }}" onclick="window.location='{{ url_for('edit_risque', id=risque.id) }}'">
+                    <td class="text-start">{{ risque.description }}</td>
+                    <td class="text-start">{{ risque.dommages }}</td>
+                    <td>{{ risque.mesures_prevention }}</td>
+                    <td>{{ risque.actions_a_mener }}</td>
+                    <td>{{ risque.responsable_action }}</td>
+                    <td>{{ risque.delai_mise_en_oeuvre }}</td>
+                    <td>{% if risque.etat_action %}✅{% else %}❌{% endif %}</td>
+                    <td>{{ "{:,.2f}".format(risque.cout_action).replace(",", " ").replace(".", ",") if risque.cout_action else "" }}</td>
+                    <td>{{ risque.score }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

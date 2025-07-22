@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>📚 Historique des DUERP archivés</h2>
+
+<table class="table table-bordered">
+<form method="get" class="mb-3 d-flex gap-2 align-items-end">
+  <div>
+    <label for="date_debut">📅 Du :</label>
+    <input type="date" name="date_debut" id="date_debut" class="form-control" value="{{ request.args.get('date_debut', '') }}">
+  </div>
+  <div>
+    <label for="date_fin">📅 Au :</label>
+    <input type="date" name="date_fin" id="date_fin" class="form-control" value="{{ request.args.get('date_fin', '') }}">
+  </div>
+  <div>
+    <label for="mot_cle">🔍 Mot-clé :</label>
+    <input type="text" name="mot_cle" id="mot_cle" class="form-control" placeholder="ex: accident, version 2…" value="{{ request.args.get('mot_cle', '') }}">
+  </div>
+  <div>
+    <button class="btn btn-primary">Filtrer</button>
+  </div>
+</form>
+
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Commentaire</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for archive in archives %}
+    <tr>
+      <td>{{ archive.date_archivage.strftime('%d/%m/%Y %H:%M') }}</td>
+      <td>{{ archive.commentaire }}</td>
+      <td>
+        <a href="{{ url_for('voir_archive_duerp', archive_id=archive.id) }}" class="btn btn-sm btn-primary" target="_blank">🧾 Consulter</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3">Aucune archive enregistrée pour l’instant.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

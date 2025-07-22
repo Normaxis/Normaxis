@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+body {
+    background-image: url("{{ url_for('static', filename='marbre.jpg') }}");
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+}
+
+.card-at {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+</style>
+
+<div class="container mt-4">
+    <h2 class="text-dark mb-4">📋 Accidents de Travail</h2>
+
+    <p>
+	<a href="{{ url_for('dashboard') }}" class="btn btn-outline-dark">🏠 Retour au dashboard</a>
+        <a href="{{ url_for('ajouter_accident') }}" class="btn btn-outline-danger">➕ Déclarer un accident</a>
+    </p>
+
+    {% if accidents %}
+        {% for a in accidents %}
+            <div class="card-at">
+                <h5>📅 {{ a.date_accident.strftime('%d/%m/%Y') }}</h5>
+                <p><strong>Poste :</strong> {{ a.poste.nom }}</p>
+                {% if a.tache %}<p><strong>Tâche :</strong> {{ a.tache.nom }}</p>{% endif %}
+                <p><strong>Description :</strong> {{ a.description[:120] }}...</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('modifier_accident', id=a.id) }}" class="btn btn-sm btn-primary">✏️ Modifier</a>
+                    <a href="{{ url_for('editer_arbre_causes', id=a.id) }}" class="btn btn-sm btn-outline-dark">🧠 Arbre des causes</a>
+                    <form method="post" action="{{ url_for('supprimer_accident', id=a.id) }}" onsubmit="return confirm('⚠️ Confirmer la suppression de cet accident ?');">
+    <button type="submit" class="btn btn-sm btn-danger">🗑️ Supprimer</button>
+</form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">Aucun accident enregistré pour l’instant.</p>
+    {% endif %}
+</div>
+{% endblock %}
