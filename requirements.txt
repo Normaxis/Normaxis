@@ -7,3 +7,4 @@ stripe
 gunicorn
 Flask-Mail
 Flask-Migrate
+beautifulsoup4
